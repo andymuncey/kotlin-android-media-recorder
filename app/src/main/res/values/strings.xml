@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SoundBoard</string>
+    <string name="playback">Playback</string>
+    <string name="recording">Recording</string>
+</resources>
