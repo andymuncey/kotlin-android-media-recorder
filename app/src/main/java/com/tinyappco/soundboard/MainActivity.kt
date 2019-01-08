@@ -4,14 +4,10 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.media.MediaPlayer
-import android.media.MediaRecorder
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-
 
 import android.view.Gravity
 import android.view.MotionEvent
@@ -22,25 +18,23 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import android.view.ViewGroup
 import android.widget.GridLayout
-
-import java.io.File
+import android.widget.ToggleButton
 
 
 class MainActivity : AppCompatActivity() {
 
     val PERMISSIONS_REQ = 1
 
+    lateinit var audioManager: AudioManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        drawBoard();
-
+        drawBoard(3,4);
         requestPermissions()
 
-        toggleButton.textOn = "Record"
-        toggleButton.textOff = "Playback"
+        audioManager = AudioManager(this)
     }
 
     fun requestPermissions(){
@@ -62,136 +56,70 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//
-//        if (requestCode == AUDIO)
-//    }
-
-
-    fun drawBoard(){
+    fun drawBoard(width: Int, height: Int){
 
         val gridLayout = GridLayout(this)
-
-        //make the grid fill the available height
         gridLayout.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        gridLayout.columnCount = width
 
-        val gridSize = 12
-
-        gridLayout.columnCount = 3
-        //gridLayout.rowCount = gridSize / gridLayout.columnCount
-
-        for (i in 0..gridSize-1){
-
+        for (i in 0 until (width * height)){
             val button = Button(this)
             button.tag = i
-            button.setText("${i+1}")
+            val buttonNumber = i + 1
+            button.setText("${buttonNumber}")
             button.setOnTouchListener(touchListener)
-            gridLayout.addView(button)
             button.gravity = Gravity.CENTER
+            gridLayout.addView(button)
 
-            val colSpec = GridLayout.spec(i % gridLayout.columnCount,1f)
-            val rowSpec = GridLayout.spec(i / gridLayout.columnCount,1f)
             val layoutParams = GridLayout.LayoutParams()
-            layoutParams.columnSpec = colSpec
-            layoutParams.rowSpec = rowSpec
-            layoutParams.height = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
-            layoutParams.width = android.widget.GridLayout.LayoutParams.WRAP_CONTENT
+            layoutParams.columnSpec = GridLayout.spec(i % width,1f)
+            layoutParams.rowSpec = GridLayout.spec(i / width,1f)
             button.layoutParams = layoutParams
         }
         this.layout.addView(gridLayout)
-
     }
 
     val touchListener = View.OnTouchListener { v: View?, event: MotionEvent? -> Boolean
 
-            val id = v?.tag as Int
+        val id = v?.tag as Int
 
-            //recording
             if (event?.action == MotionEvent.ACTION_DOWN) {
 
-                if (toggleButton.isChecked){
-                    startRecording(id)
-                    v.background.setColorFilter(Color.RED,PorterDuff.Mode.DARKEN)
-                    //PorterDuff is a class with list of blending + compositing modes, named after the authors of a paper on the subject
+                if (toggleButton.isChecked){ //recording
+                    val isRecording = audioManager.startRecording(id)
+                    if (isRecording) {
+                        v.background.setColorFilter(Color.RED, PorterDuff.Mode.DARKEN)
+                        //PorterDuff is a class with list of blending + compositing modes, named after the authors of a paper on the subject
+                    } else {
+                        Toast.makeText(this,"Unable to start recording",Toast.LENGTH_LONG).show()
+                    }
 
                 } else {
-                    startPlayback(id)
-                    v.background.setColorFilter(Color.GREEN,PorterDuff.Mode.DARKEN)
+                    if (audioManager.startPlayback(id)){
+                        v.background.setColorFilter(Color.GREEN,PorterDuff.Mode.DARKEN)
+                    }
                 }
 
                 toggleButton.isEnabled = false
 
-                true
+                return@OnTouchListener true
             }
             if (event?.action == MotionEvent.ACTION_UP){
 
                 if (toggleButton.isChecked){
-                    stopRecording()
-
+                    audioManager.stopRecording()
                 } else {
-                    stopPlayback()
+                    audioManager.stopPlayback()
                 }
 
                 v.background.clearColorFilter()
                 toggleButton.isEnabled = true
 
-                true
+                return@OnTouchListener true
             }
-
 
          false
     }
 
-    var mediaRecorder : MediaRecorder? = null
-    var mediaPlayer : MediaPlayer? = null
-
-    fun startPlayback(channel: Int){
-        val path = fileLocationForChannel(channel)
-        if (File(path).exists()) {
-            mediaPlayer = MediaPlayer()
-            mediaPlayer?.setDataSource(path)
-            mediaPlayer?.prepare()
-            mediaPlayer?.start()
-        }
-    }
-
-    fun stopPlayback(){
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = null
-    }
-
-    private fun fileLocationForChannel(channel: Int) : String {
-        return Environment.getExternalStorageDirectory().absolutePath + "/$channel.aac"
-    }
-
-    fun startRecording(channel: Int) {
-        mediaRecorder = MediaRecorder()
-        mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT)
-        mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-        mediaRecorder?.setAudioSamplingRate(48000)
-        mediaRecorder?.setAudioEncodingBitRate(128000)
-
-        val fileLocation = fileLocationForChannel(channel)
-        mediaRecorder?.setOutputFile(fileLocation)
-        mediaRecorder?.prepare()
-
-        if (this.packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)){
-            //record
-            //add storage permission to manifest
-            mediaRecorder?.start()
-
-        }
-        else {
-            Toast.makeText(this,"No Microphone",Toast.LENGTH_LONG).show()
-        }
-    }
-
-    fun stopRecording(){
-        mediaRecorder?.stop()
-        mediaRecorder?.release()
-    }
 
 }

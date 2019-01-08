@@ -14,7 +14,9 @@
             android:layout_height="wrap_content"
             android:id="@+id/toggleButton"
             android:textOff="@string/playback"
-            android:textOn="@string/recording"/>
+            android:textOn="@string/record"
+
+    />
 
 
 </LinearLayout>
