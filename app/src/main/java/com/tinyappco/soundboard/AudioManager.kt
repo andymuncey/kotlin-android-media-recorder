@@ -7,10 +7,10 @@ import android.media.MediaRecorder
 import android.os.Environment
 import java.io.File
 
-class AudioManager(val context: Context) {
+class AudioManager(private val context: Context) {
 
-    var mediaRecorder: MediaRecorder? = null
-    var mediaPlayer: MediaPlayer? = null
+    private var mediaRecorder: MediaRecorder? = null
+    private var mediaPlayer: MediaPlayer? = null
 
     fun startPlayback(id: Int): Boolean {
         val path = filePathForId(id)

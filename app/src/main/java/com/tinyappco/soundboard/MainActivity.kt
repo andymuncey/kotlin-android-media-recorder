@@ -4,40 +4,37 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Button
-
-import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_main.*
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.GridLayout
-import android.widget.ToggleButton
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
 
-    val PERMISSIONS_REQ = 1
+    private val PERMISSIONS_REQ = 1
 
-    lateinit var audioManager: AudioManager
+    private lateinit var audioManager: AudioManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        drawBoard(3,4);
+        drawBoard(3,4)
         requestPermissions()
 
         audioManager = AudioManager(this)
     }
 
-    fun requestPermissions(){
+    private fun requestPermissions(){
         val permissionsRequired = mutableListOf<String>()
 
         val hasRecordPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
@@ -56,17 +53,17 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun drawBoard(width: Int, height: Int){
+    private fun drawBoard(width: Int, height: Int){
 
         val gridLayout = GridLayout(this)
-        gridLayout.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        gridLayout.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         gridLayout.columnCount = width
 
         for (i in 0 until (width * height)){
             val button = Button(this)
             button.tag = i
             val buttonNumber = i + 1
-            button.setText("${buttonNumber}")
+            button.text = "$buttonNumber"
             button.setOnTouchListener(touchListener)
             button.gravity = Gravity.CENTER
             gridLayout.addView(button)
@@ -79,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         this.layout.addView(gridLayout)
     }
 
-    val touchListener = View.OnTouchListener { v: View?, event: MotionEvent? -> Boolean
+    private val touchListener = View.OnTouchListener { v: View?, event: MotionEvent? -> Boolean
 
         val id = v?.tag as Int
 
