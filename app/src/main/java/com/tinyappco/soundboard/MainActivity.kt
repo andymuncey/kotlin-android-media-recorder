@@ -15,7 +15,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlinx.android.synthetic.main.activity_main.*
+import com.tinyappco.soundboard.databinding.ActivityMainBinding
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -24,9 +25,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var audioManager: AudioManager
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         drawBoard(3,4)
         requestPermissions()
@@ -73,16 +79,18 @@ class MainActivity : AppCompatActivity() {
             layoutParams.rowSpec = GridLayout.spec(i / width,1f)
             button.layoutParams = layoutParams
         }
-        this.layout.addView(gridLayout)
+        binding.layout.addView(gridLayout)
     }
 
     private val touchListener = View.OnTouchListener { v: View?, event: MotionEvent? -> Boolean
+
+        v?.performClick()
 
         val id = v?.tag as Int
 
             if (event?.action == MotionEvent.ACTION_DOWN) {
 
-                if (toggleButton.isChecked){ //recording
+                if (binding.toggleButton.isChecked){ //recording
                     val isRecording = audioManager.startRecording(id)
                     if (isRecording) {
                         v.background.setColorFilter(Color.RED, PorterDuff.Mode.DARKEN)
@@ -97,20 +105,20 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                toggleButton.isEnabled = false
+                binding.toggleButton.isEnabled = false
 
                 return@OnTouchListener true
             }
             if (event?.action == MotionEvent.ACTION_UP){
 
-                if (toggleButton.isChecked){
+                if (binding.toggleButton.isChecked){
                     audioManager.stopRecording()
                 } else {
                     audioManager.stopPlayback()
                 }
 
                 v.background.clearColorFilter()
-                toggleButton.isEnabled = true
+                binding.toggleButton.isEnabled = true
 
                 return@OnTouchListener true
             }

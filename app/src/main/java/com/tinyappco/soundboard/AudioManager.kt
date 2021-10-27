@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Environment
+import android.provider.MediaStore
 import java.io.File
 
 class AudioManager(private val context: Context) {
@@ -31,7 +32,7 @@ class AudioManager(private val context: Context) {
     }
 
     private fun filePathForId(id: Int): String { //Once Kotlin has proper UInt type change this
-        return Environment.getExternalStorageDirectory().absolutePath + "/$id.aac"
+        return context.getExternalFilesDir(null)!!.absolutePath + "/$id.aac"
     }
 
     fun startRecording(id: Int): Boolean {
