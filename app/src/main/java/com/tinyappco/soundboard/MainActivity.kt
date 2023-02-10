@@ -17,8 +17,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.tinyappco.soundboard.databinding.ActivityMainBinding
 
-
-
 class MainActivity : AppCompatActivity() {
 
     private val PERMISSIONS_REQ = 1
@@ -84,9 +82,9 @@ class MainActivity : AppCompatActivity() {
 
     private val touchListener = View.OnTouchListener { v: View?, event: MotionEvent? -> Boolean
 
-        v?.performClick()
+            v?.performClick()
 
-        val id = v?.tag as Int
+            val id = v?.tag as Int
 
             if (event?.action == MotionEvent.ACTION_DOWN) {
 
