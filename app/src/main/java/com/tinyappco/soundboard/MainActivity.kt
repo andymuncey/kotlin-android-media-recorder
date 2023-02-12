@@ -2,8 +2,12 @@ package com.tinyappco.soundboard
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.MotionEvent
@@ -91,15 +95,14 @@ class MainActivity : AppCompatActivity() {
                 if (binding.toggleButton.isChecked){ //recording
                     val isRecording = audioManager.startRecording(id)
                     if (isRecording) {
-                        v.background.setColorFilter(Color.RED, PorterDuff.Mode.DARKEN)
-                        //PorterDuff is a class with list of blending + compositing modes, named after the authors of a paper on the subject
+                        setBackgroundColour(Color.RED, v)
                     } else {
                         Toast.makeText(this,"Unable to start recording",Toast.LENGTH_LONG).show()
                     }
 
                 } else {
                     if (audioManager.startPlayback(id)){
-                        v.background.setColorFilter(Color.GREEN,PorterDuff.Mode.DARKEN)
+                       setBackgroundColour(Color.GREEN, v)
                     }
                 }
 
@@ -122,6 +125,17 @@ class MainActivity : AppCompatActivity() {
             }
 
          false
+    }
+
+    private fun setBackgroundColour(colour: Int, v: View) {
+        val filter = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            BlendModeColorFilter(colour, BlendMode.DARKEN)
+        } else {
+            @Suppress("DEPRECATION")
+            PorterDuffColorFilter(colour, PorterDuff.Mode.DARKEN)
+            //PorterDuff is a class with list of blending + compositing modes, named after the authors of a paper on the subject
+        }
+        v.background.colorFilter = filter
     }
 
 
