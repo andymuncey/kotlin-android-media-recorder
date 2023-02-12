@@ -4,8 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.media.MediaRecorder
-import android.os.Environment
-import android.provider.MediaStore
+import android.os.Build
 import java.io.File
 
 class AudioManager(private val context: Context) {
@@ -41,7 +40,12 @@ class AudioManager(private val context: Context) {
         if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
 
             //create new instance of MediaRecorder
-            mediaRecorder = MediaRecorder()
+            mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                MediaRecorder(context)
+            } else {
+                @Suppress("DEPRECATION")
+                MediaRecorder()
+            }
 
             //specify source of audio (Microphone)
             mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
