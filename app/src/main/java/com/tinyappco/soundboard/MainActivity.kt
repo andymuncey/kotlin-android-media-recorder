@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -43,20 +44,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermissions(){
-        val permissionsRequired = mutableListOf<String>()
-
         val hasRecordPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         if (!hasRecordPermission){
-            permissionsRequired.add(Manifest.permission.RECORD_AUDIO)
-        }
-
-        val hasStoragePermission = ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-        if (!hasStoragePermission){
-            permissionsRequired.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-
-        if (permissionsRequired.isNotEmpty()){
-            ActivityCompat.requestPermissions(this, permissionsRequired.toTypedArray(),PERMISSIONS_REQ)
+            val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
+                    permitted: Boolean ->
+                if (!permitted){
+                    Toast.makeText(this,"You need to give permissions for the app to work",Toast.LENGTH_LONG).show()
+                }
+            }
+            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
     }
 
